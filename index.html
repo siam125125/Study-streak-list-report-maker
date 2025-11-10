@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study Streak Challenge</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        :root {
+            --bg-color-dark: #1f1f1f;
+            --bg-glass-dark: rgba(45, 45, 45, 0.6);
+            --border-color-dark: rgba(255, 255, 255, 0.1);
+            --text-color-dark: #f0f0f0;
+            --header-color: #f7b731;
+            --accent-color: #4CAF50;
+            --warn-color: #FF5722;
+            --danger-color: #f44336;
+            --input-bg-dark: #3a3a3a;
+            --input-border-dark: #555;
+            --highlight-color: #e5ff00;
+            --cancel-btn-bg-dark: #555;
+            --cancel-btn-hover-dark: #777;
+
+            /* Light mode variables */
+            --bg-color-light: #f0f2f5;
+            --bg-glass-light: rgba(255, 255, 255, 0.6);
+            --border-color-light: rgba(0, 0, 0, 0.1);
+            --text-color-light: #333;
+            --input-bg-light: #fff;
+            --input-border-light: #ccc;
+            --cancel-btn-bg-light: #ccc;
+            --cancel-btn-hover-light: #aaa;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-color-dark);
+            color: var(--text-color-dark);
+            transition: background-color 0.3s, color 0.3s;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 95%;
+            max-width: 1400px; 
+            margin: 20px auto;
+            padding: 20px;
+            background: var(--bg-glass-dark);
+            border-radius: 20px;
+            border: 1px solid var(--border-color-dark);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            overflow-x: auto; 
+        }
+
+        body.light-mode {
+            background-color: var(--bg-color-light);
+            color: var(--text-color-light);
+        }
+
+        body.light-mode .container {
+            background: var(--bg-glass-light);
+            border: 1px solid var(--border-color-light);
+        }
+
+        body.light-mode input, body.light-mode button, body.light-mode .data-entry-row,
+        body.light-mode .modal-content, body.light-mode .search-box-container input, body.light-mode .search-box-container {
+            background-color: var(--input-bg-light);
+            border-color: var(--input-border-light);
+            color: var(--text-color-light);
+        }
+
+        body.light-mode button.delete-btn {
+            background-color: #ffaaaa;
+            border-color: #ff5555;
+            color: #fff;
+        }
+
+        body.light-mode button.reset-btn {
+            background-color: #ffeb99;
+            border-color: #ffc400;
+            color: #333;
+        }
+
+        body.light-mode .highlighted-row {
+            background-color: rgba(255, 255, 179, 0.4);
+        }
+
+        body.light-mode .cancel-search-btn {
+            background-color: var(--cancel-btn-bg-light);
+            color: var(--text-color-light);
+        }
+        
+        body.light-mode .cancel-search-btn:hover {
+            background-color: var(--cancel-btn-hover-light);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        
+        .header-left h1 {
+            font-size: 2em;
+            margin: 0;
+            color: var(--text-color-dark);
+            transition: color 0.3s;
+        }
+        
+        body.light-mode .header-left h1 {
+            color: var(--text-color-light);
+        }
+
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px; /* Increased gap */
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        
+        .btn-global-reset {
+            background-color: #FF9800; 
+            color: #333;
+            font-weight: 700;
+        }
+        
+        .day-display {
+            font-size: 1em;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .day-display input {
+            padding: 5px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .mode-toggle {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .mode-toggle input {
+            display: none;
+        }
+
+        .slider {
+            width: 50px;
+            height: 25px;
+            background-color: #ccc;
+            border-radius: 25px;
+            position: relative;
+            transition: background-color 0.4s;
+        }
+
+        .slider:before {
+            content: '';
+            position: absolute;
+            width: 21px;
+            height: 21px;
+            border-radius: 50%;
+            background-color: white;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.4s;
+        }
+
+        .mode-toggle input:checked + .slider {
+            background-color: #333;
+        }
+        
+        .mode-toggle input:checked + .slider:before {
+            transform: translateX(25px);
+        }
+        
+        .mode-toggle span {
+            margin-left: 10px;
+            font-size: 0.9em;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-red {
+            background-color: var(--danger-color);
+            color: #fff;
+        }
+
+        .btn-green {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+        
+        .search-btn {
+            background-color: transparent;
+            border: 1px solid var(--text-color-dark);
+            color: var(--text-color-dark);
+            padding: 8px;
+            font-size: 1.2em;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        body.light-mode .search-btn {
+            border-color: var(--text-color-light);
+            color: var(--text-color-light);
+        }
+
+        .section {
+            margin-top: 20px;
+        }
+
+        .section h2 {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--header-color);
+            padding-bottom: 5px;
+        }
+
+        .data-entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px; 
+            margin-bottom: 10px;
+        }
+
+        .search-add-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap; 
+            width: 100%;
+            justify-content: flex-end;
+            margin-top: 10px;
+        }
+
+        /* ------------------------------------------- */
+        /* Table and Action Button Specific Styling */
+        /* ------------------------------------------- */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1200px; 
+        }
+
+        .data-table th, .data-table td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color-dark);
+            font-size: 0.9em;
+        }
+        
+        .data-table td.actions {
+            white-space: nowrap; 
+        }
+
+        body.light-mode .data-table th, body.light-mode .data-table td {
+            border-bottom: 1px solid var(--border-color-light);
+        }
+
+        .data-table th {
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        body.light-mode .data-table th {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .data-entry-row {
+            cursor: pointer;
+            transition: background-color 0.5s ease-out;
+        }
+        
+        .highlighted-row {
+            animation: highlight 1.5s forwards;
+        }
+        
+        @keyframes highlight {
+            from { background-color: var(--highlight-color); }
+            to { background-color: initial; }
+        }
+
+        .highlight-up {
+            background-color: rgba(76, 175, 80, 0.4);
+        }
+
+        .highlight-down {
+            background-color: rgba(244, 67, 54, 0.4);
+        }
+        
+        .data-entry-row input[type="text"], .data-entry-row input[type="number"], .data-entry-row input.study-input {
+            width: calc(100% - 24px);
+            padding: 8px 10px;
+            border: 1px solid var(--input-border-dark);
+            background-color: var(--input-bg-dark);
+            color: var(--text-color-dark);
+            border-radius: 8px;
+            transition: border-color 0.3s;
+        }
+        
+        .data-entry-row input[type="number"] {
+            width: 60px;
+        }
+        
+        .study-time-inputs {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .study-time-inputs input.study-input {
+            width: 50px !important; 
+        }
+
+        .data-entry-row input:focus {
+            outline: none;
+            border-color: var(--header-color);
+        }
+
+        .actions button {
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8em;
+            margin-left: 5px;
+            display: inline-block;
+        }
+
+        .actions .reset-btn {
+            background-color: #ffc107;
+            color: #333;
+        }
+        
+        .actions .done-btn {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+        
+        .actions .delete-btn {
+            background-color: var(--danger-color);
+            color: #fff;
+        }
+        /* ------------------------------------------- */
+
+
+        .report-preview-container {
+            margin-top: 30px;
+        }
+
+        .report-output {
+            background: rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border-color-dark);
+            padding: 20px;
+            border-radius: 10px;
+            white-space: pre-wrap;
+            font-size: 1em;
+            line-height: 1.6;
+            transition: background-color 0.3s;
+        }
+
+        body.light-mode .report-output {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color-light);
+        }
+
+        .copy-btn-container {
+            text-align: right;
+            margin-top: 15px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .copy-btn, .download-btn {
+            background-color: var(--accent-color);
+            color: #fff;
+        }
+
+        .summary-stats {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            font-weight: 600;
+            border: 1px solid var(--border-color-dark);
+        }
+
+        body.light-mode .summary-stats {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color-light);
+        }
+
+        .warnings-control {
+            display: flex;
+            align-items: center;
+        }
+        
+        .warnings-control button {
+            padding: 2px 8px;
+            font-size: 1.2em;
+            line-height: 1;
+            border: 1px solid var(--input-border-dark);
+            background-color: var(--input-bg-dark);
+            color: var(--text-color-dark);
+            border-radius: 5px;
+            margin: 0 5px;
+            cursor: pointer;
+            width: 30px;
+        }
+
+        .warnings-control span {
+            font-weight: 600;
+            width: 15px;
+            text-align: center;
+        }
+
+        body.light-mode .warnings-control button {
+            background-color: var(--input-bg-light);
+            border: 1px solid var(--input-border-light);
+            color: var(--text-color-light);
+        }
+        
+        /* MODIFIED: Changed grid to 3 columns for Top 5, Wipeout and Banned */
+        .preview-grid-container {
+            display: grid;
+            gap: 20px;
+            margin-top: 20px;
+            grid-template-columns: 1fr;
+        }
+        
+        @media (min-width: 768px) {
+            .preview-grid-container {
+                grid-template-columns: 1fr 1fr 1fr; /* Three boxes side-by-side */
+            }
+        }
+        /* END MODIFIED GRID */
+        
+        .preview-box {
+            border: 1px solid var(--border-color-dark);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border-radius: 10px;
+            padding: 15px;
+        }
+
+        .preview-box h3 {
+            margin-top: 0;
+            font-size: 1.2em;
+            border-bottom: 2px solid var(--header-color);
+            padding-bottom: 5px;
+        }
+
+        .preview-box .item-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .preview-box .item-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-color-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .preview-box .item-list li:last-child {
+            border-bottom: none;
+        }
+
+        .preview-box .item-list li span {
+            font-weight: 600;
+        }
+        
+        body.light-mode .preview-box {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border-color-light);
+        }
+        
+        body.light-mode .preview-box .item-list li {
+            border-bottom: 1px solid var(--border-color-light);
+        }
+
+        /* Status-specific styles for the preview boxes */
+        /* Re-introduced status-top5 for clarity */
+        .status-top5 {
+            background-color: rgba(76, 175, 80, 0.1); /* Light green for Top 5 */
+        }
+        body.light-mode .status-top5 {
+            background-color: rgba(76, 175, 80, 0.2); 
+        }
+
+        .status-wipeout {
+            background-color: rgba(244, 67, 54, 0.1);
+        }
+
+        body.light-mode .status-wipeout {
+            background-color: rgba(244, 67, 54, 0.2);
+        }
+
+        .status-banned {
+            background-color: rgba(144, 12, 63, 0.1);
+        }
+        body.light-mode .status-banned {
+            background-color: rgba(144, 12, 63, 0.2);
+        }
+        
+        /* Modal styles remain unchanged */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: var(--bg-color-dark);
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            animation-name: modalopen;
+            animation-duration: 0.4s;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        body.light-mode .modal-content {
+            background-color: var(--bg-color-light);
+        }
+        
+        @keyframes modalopen {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: var(--text-color-dark);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        body.light-mode .close-btn {
+            color: var(--text-color-light);
+        }
+        
+        .modal-search-box-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+            width: 100%;
+        }
+        
+        .modal-search-box-container input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--input-border-dark);
+            background-color: var(--input-bg-dark);
+            color: var(--text-color-dark);
+            font-size: 1.2em;
+            transition: border-color 0.3s;
+        }
+
+        body.light-mode .modal-search-box-container input {
+            background-color: var(--input-bg-light);
+            border-color: var(--input-border-light);
+            color: var(--text-color-light);
+        }
+        
+        .modal-autocomplete-items {
+            position: absolute;
+            border: 1px solid var(--border-color-dark);
+            border-bottom: none;
+            border-top: none;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-color-dark);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding-top: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        body.light-mode .modal-autocomplete-items {
+            background-color: var(--bg-color-light);
+        }
+
+        .modal-autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            background-color: var(--input-bg-dark);
+            border-bottom: 1px solid var(--border-color-dark);
+        }
+        
+        .modal-autocomplete-items div:hover {
+            background-color: var(--cancel-btn-hover-dark);
+        }
+        
+        body.light-mode .modal-autocomplete-items div {
+            background-color: var(--input-bg-light);
+        }
+        
+        body.light-mode .modal-autocomplete-items div:hover {
+            background-color: var(--cancel-btn-hover-light);
+        }
+        
+        /* Mobile-specific fix for the data entry header */
+        @media (max-width: 600px) {
+            .search-add-container {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-add-container .search-btn {
+                width: 100%;
+                border-radius: 10px;
+            }
+            #addNewRowBtn {
+                width: 100%;
+            }
+            .study-time-inputs {
+                justify-content: center;
+            }
+            .study-time-inputs input.study-input {
+                width: 40px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div class="header-left">
+            <h1 style="color: #f7b731;"><span id="main-title-text">📚 10-Day Study Streak Challenge: Daily Report! 🚀</span></h1>
+        </div>
+        <div class="header-right">
+            <span class="day-display">Challenge Days: <input type="number" id="challengeDaysInput" value="10" min="1" style="width: 40px; text-align: center;"></span>
+            <span class="day-display">Day: <input type="number" id="dayInput" value="0" style="width: 40px; text-align: center;"></span>
+            <button class="btn btn-red" id="resetStudyTimeBtn">Reset Daily Study Time</button>
+            <label class="mode-toggle">
+                <input type="checkbox" id="darkModeToggle">
+                <div class="slider"></div>
+                <span>Dark Mode</span>
+            </label>
+        </div>
+    </header>
+
+    <div class="section">
+        <div class="data-entry-header">
+            <h2>1) Data Entry</h2>
+            <div class="search-add-container">
+                <button class="btn search-btn" id="openSearchBtn">🔍</button>
+                <input type="file" id="importDataInput" style="display: none;" accept=".json">
+                <button class="btn" id="importDataBtn" style="background-color: #00bcd4; color: #fff;">Import Data</button>
+                <button class="btn" id="exportDataBtn" style="background-color: #9c27b0; color: #fff;">Export Data</button>
+                <button class="btn btn-global-reset" id="globalResetBtn">Global Reset</button>
+                <button class="btn btn-green" id="addNewRowBtn">+ Add New Row</button>
+            </div>
+        </div>
+        <table class="data-table" id="dataTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Current Streak</th>
+                    <th>Maximum Streak</th>
+                    <th>Study Time (hr)</th>
+                    <th>Study Time (min)</th>
+                    <th>Total Study Time</th>
+                    <th>Warnings</th>
+                    <th>Banned?</th>
+                    <th class="actions">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody >
+        </table>
+    </div>
+
+    ---
+
+    <div class="section">
+        <h2>2) Participant Status Preview</h2>
+        <div class="preview-grid-container">
+            <div class="preview-box status-top5" id="top5-preview">
+                <h3>🏆 Today's Top 5!</h3>
+                <ul class="item-list"></ul>
+            </div>
+            <div class="preview-box status-wipeout" id="wipeout-preview">
+                <h3>❌ The Wipeout Zone</h3>
+                <ul class="item-list"></ul>
+            </div>
+            <div class="preview-box status-banned" id="banned-preview">
+                <h3>🚫 Banned Zone</h3>
+                <ul class="item-list"></ul>
+            </div>
+        </div>
+    </div>
+
+    ---
+
+    <div class="section report-preview-container">
+        <h2>Report Preview</h2>
+        <div class="summary-stats">
+            <span id="totalStudyHours">Grand Total Study Time: 0 hr 0 min</span>
+            <span id="lastUpdated">Last Updated: N/A</span>
+        </div>
+        <div class="report-output" id="reportPreview">
+            </div>
+        <div class="copy-btn-container">
+            <button class="btn copy-btn" id="copyReportBtn">Copy Report</button>
+            <button class="btn download-btn" id="downloadReportBtn">Download Report</button>
+        </div>
+    </div>
+</div>
+
+<div id="searchModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn">&times;</span>
+        <div class="modal-search-box-container">
+            <input type="text" id="modalSearchBox" placeholder="Search for a participant...">
+            <div id="modal-autocomplete-list" class="modal-autocomplete-items"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const dataTableBody = document.getElementById('dataTable').querySelector('tbody');
+    const addNewRowBtn = document.getElementById('addNewRowBtn');
+    const resetStudyTimeBtn = document.getElementById('resetStudyTimeBtn');
+    const openSearchBtn = document.getElementById('openSearchBtn');
+    const searchModal = document.getElementById('searchModal');
+    const modalSearchBox = document.getElementById('modalSearchBox');
+    const closeBtn = document.querySelector('.close-btn');
+    const modalAutocompleteList = document.getElementById('modal-autocomplete-list');
+    const reportPreview = document.getElementById('reportPreview');
+    const copyReportBtn = document.getElementById('copyReportBtn');
+    const downloadReportBtn = document.getElementById('downloadReportBtn');
+    const dayInput = document.getElementById('dayInput');
+    const darkModeToggle = document.getElementById('darkModeToggle');
+    const body = document.body;
+    const totalStudyHoursSpan = document.getElementById('totalStudyHours');
+    const lastUpdatedSpan = document.getElementById('lastUpdated');
+    
+    // NEW FEATURE VARIABLES: Import/Export
+    const importDataBtn = document.getElementById('importDataBtn');
+    const exportDataBtn = document.getElementById('exportDataBtn');
+    const importDataInput = document.getElementById('importDataInput');
+    
+    // NEW FEATURE VARIABLE: Global Reset
+    const globalResetBtn = document.getElementById('globalResetBtn');
+
+    // NEW VARIABLE: Dynamic Challenge Days
+    const challengeDaysInput = document.getElementById('challengeDaysInput');
+    const mainTitleTextSpan = document.getElementById('main-title-text');
+
+    // Preview containers
+    const top5Preview = document.getElementById('top5-preview').querySelector('ul'); 
+    const wipeoutPreview = document.getElementById('wipeout-preview').querySelector('ul');
+    const bannedPreview = document.getElementById('banned-preview').querySelector('ul');
+
+    // Helper to convert total minutes to "X hr Y min" format
+    function formatTotalTime(totalMinutes) {
+        const minutesValue = parseFloat(totalMinutes) || 0; 
+        
+        if (minutesValue < 0) return 'Error';
+        const hours = Math.floor(minutesValue / 60);
+        const minutes = Math.round(minutesValue % 60);
+        return `${hours} hr ${minutes} min`;
+    }
+
+    // NEW HELPER FUNCTION: Safely evaluates simple addition expressions
+    function evaluateExpression(expression) {
+        if (typeof expression === 'string' && expression.includes('+')) {
+            try {
+                const parts = expression.replace(/\s/g, '').split('+');
+                let sum = 0;
+                let isCalculation = false;
+                
+                for (const part of parts) {
+                    const number = parseFloat(part);
+                    if (isNaN(number)) {
+                        return parseFloat(expression) || 0; 
+                    }
+                    sum += number;
+                    isCalculation = true;
+                }
+                
+                return isCalculation ? sum : (parseFloat(expression) || 0);
+
+            } catch (e) {
+                return parseFloat(expression) || 0;
+            }
+        }
+        return parseFloat(expression) || 0;
+    }
+
+    // Default participant list
+    const NEW_DEFAULT_PARTICIPANTS = [
+        // Top 5 (Streak: 1, Max: 1) - Totals converted from hr:min
+        { name: 'Orin', currentStreak: 1, maximumStreak: 1, studyTimeMinutes: 0, totalStudyTimeMinutes: 996, warnings: 0, isBanned: false }, // 16 hr 36 min
+        { name: 'SHIMU', currentStreak: 1, maximumStreak: 1, studyTimeMinutes: 0, totalStudyTimeMinutes: 915, warnings: 0, isBanned: false }, // 15 hr 15 min
+        { name: 'Nafi07', currentStreak: 1, maximumStreak: 1, studyTimeMinutes: 0, totalStudyTimeMinutes: 841, warnings: 0, isBanned: false }, // 14 hr 1 min
+        { name: 'panda_opu', currentStreak: 1, maximumStreak: 1, studyTimeMinutes: 0, totalStudyTimeMinutes: 818, warnings: 0, isBanned: false }, // 13 hr 38 min
+        { name: 'Silfira', currentStreak: 1, maximumStreak: 1, studyTimeMinutes: 0, totalStudyTimeMinutes: 780, warnings: 0, isBanned: false }, // 13 hr 0 min
+        // Other Participants (Streak: 1, Max: 1)
+        { name: 'NR Nowsin', currentStreak: 1, maximumStreak: 1, studyTimeMinutes: 0, totalStudyTimeMinutes: 682, warnings: 0, isBanned: false }, // 11 hr 22 min
+        { name: 'tanzim', currentStreak: 1, maximumStreak: 1, studyTimeMinutes: 0, totalStudyTimeMinutes: 672, warnings: 0, isBanned: false }, // 11 hr 12 min
+        { name: 'নাপা তিন বেলা', currentStreak: 1, maximumStreak: 1, studyTimeMinutes: 0, totalStudyTimeMinutes: 665, warnings: 0, isBanned: false }, // 11 hr 5 min
+        { name: 'ভাল্লাগেনা', currentStreak: 1, maximumStreak: 1, studyTimeMinutes: 0, totalStudyTimeMinutes: 665, warnings: 0, isBanned: false }, // 11 hr 5 min
+        { name: 'SHAHED', currentStreak: 1, maximumStreak: 1, studyTimeMinutes: 0, totalStudyTimeMinutes: 664, warnings: 0, isBanned: false }, // 11 hr 4 min
+        { name: 'studying', currentStreak: 1, maximumStreak: 1, studyTimeMinutes: 0, totalStudyTimeMinutes: 661, warnings: 0, isBanned: false }, // 11 hr 1 min
+        // Wipeout Zone (Streak: 0, Max: 0, Total: 0) - Total 11
+        { name: 'Alkabid', currentStreak: 0, maximumStreak: 0, studyTimeMinutes: 0, totalStudyTimeMinutes: 0, warnings: 0, isBanned: false },
+        { name: 'Bush_Raa', currentStreak: 0, maximumStreak: 0, studyTimeMinutes: 0, totalStudyTimeMinutes: 0, warnings: 0, isBanned: false },
+        { name: "L'miss", currentStreak: 0, maximumStreak: 0, studyTimeMinutes: 0, totalStudyTimeMinutes: 0, warnings: 0, isBanned: false },
+        { name: 'Maruf', currentStreak: 0, maximumStreak: 0, studyTimeMinutes: 0, totalStudyTimeMinutes: 0, warnings: 0, isBanned: false },
+        { name: 'RAFED', currentStreak: 0, maximumStreak: 0, studyTimeMinutes: 0, totalStudyTimeMinutes: 0, warnings: 0, isBanned: false },
+        { name: 'RIRURU', currentStreak: 0, maximumStreak: 0, studyTimeMinutes: 0, totalStudyTimeMinutes: 0, warnings: 0, isBanned: false },
+        { name: 'ruhi', currentStreak: 0, maximumStreak: 0, studyTimeMinutes: 0, totalStudyTimeMinutes: 0, warnings: 0, isBanned: false },
+        { name: 'Samira', currentStreak: 0, maximumStreak: 0, studyTimeMinutes: 0, totalStudyTimeMinutes: 0, warnings: 0, isBanned: false },
+        { name: 'SIAM', currentStreak: 0, maximumStreak: 0, studyTimeMinutes: 0, totalStudyTimeMinutes: 0, warnings: 0, isBanned: false },
+        { name: 'Tasnia', currentStreak: 0, maximumStreak: 0, studyTimeMinutes: 0, totalStudyTimeMinutes: 0, warnings: 0, isBanned: false },
+        { name: 'নাবিলা', currentStreak: 0, maximumStreak: 0, studyTimeMinutes: 0, totalStudyTimeMinutes: 0, warnings: 0, isBanned: false },
+    ];
+    
+    // Default Report Content (UPDATED to reflect Top 5 and Others starting from 6)
+    // NOTE: This will be dynamically updated in window.onload
+    const DEFAULT_REPORT_CONTENT = `### **📚 10-Day Study Streak Challenge: Daily Report! 🚀**\n\n**🔥 Day [0] Leaderboard! 🔥**\n\n**🏆 Today's Top 5!**\n\n1. [Orin] - Current Streak: [1] Days | Max Streak: [1] Days | Total study hr: 16 hr 36 min\n2. [SHIMU] - Current Streak: [1] Days | Max Streak: [1] Days | Total study hr: 15 hr 15 min\n3. [Nafi07] - Current Streak: [1] Days | Max Streak: [1] Days | Total study hr: 14 hr 1 min\n4. [panda_opu] - Current Streak: [1] Days | Max Streak: [1] Days | Total study hr: 13 hr 38 min\n5. [Silfira] - Current Streak: [1] Days | Max Streak: [1] Days | Total study hr: 13 hr 0 min\n\n**🥇 Other Participants (excluding Top 5 and Wipeout Zone)**\n\n6. [NR Nowsin] - Current Streak: [1] Days | Max Streak: [1] Days | Total study hr: 11 hr 22 min\n7. [tanzim] - Current Streak: [1] Days | Max Streak: [1] Days | Total study hr: 11 hr 12 min\n8. [নাপা তিন বেলা] - Current Streak: [1] Days | Max Streak: [1] Days | Total study hr: 11 hr 5 min\n9. [ভাল্লাগেনা] - Current Streak: [1] Days | Max Streak: [1] Days | Total study hr: 11 hr 5 min\n10. [SHAHED] - Current Streak: [1] Days | Max Streak: [1] Days | Total study hr: 11 hr 4 min\n11. [studying] - Current Streak: [1] Days | Max Streak: [1] Days | Total study hr: 11 hr 1 min\n\n### **❌ The Wipeout Zone**\n\n**(Total: 11)**\n\n- [Alkabid] - (Current Streak reset) | Total study hr: 0 hr 0 min\n- [Bush_Raa] - (Current Streak reset) | Total study hr: 0 hr 0 min\n- [L\\'miss] - (Current Streak reset) | Total study hr: 0 hr 0 min\n- [Maruf] - (Current Streak reset) | Total study hr: 0 hr 0 min\n- [RAFED] - (Current Streak reset) | Total study hr: 0 hr 0 min\n- [RIRURU] - (Current Streak reset) | Total study hr: 0 hr 0 min\n- [ruhi] - (Current Streak reset) | Total study hr: 0 hr 0 min\n- [Samira] - (Current Streak reset) | Total study hr: 0 hr 0 min\n- [SIAM] - (Current Streak reset) | Total study hr: 0 hr 0 min\n- [Tasnia] - (Current Streak reset) | Total study hr: 0 hr 0 min\n- [নাবিলা] - (Current Streak reset) | Total study hr: 0 hr 0 min\n\n### 🚫 **Banned Zone**\n\nNo one in the Banned Zone today.`;
+
+
+    let participants = JSON.parse(localStorage.getItem('studyParticipants')) || NEW_DEFAULT_PARTICIPANTS.map(p => ({
+        ...p,
+        totalStudyTimeMinutes: p.totalStudyTimeMinutes !== undefined ? (parseFloat(p.totalStudyTimeMinutes) || 0) : 0,
+        studyTimeMinutes: p.studyTimeMinutes !== undefined ? (parseFloat(p.studyTimeMinutes) || 0) : 0
+    }));
+
+    let dayNumber = localStorage.getItem('studyDay') || 0; 
+    dayInput.value = dayNumber;
+
+    // Function to update the challenge days display and storage
+    function updateChallengeDayDisplays() {
+        const days = parseInt(challengeDaysInput.value) || 10;
+        challengeDaysInput.value = days;
+        
+        // Update document title
+        document.title = `${days}-Day Study Streak Challenge`;
+
+        // Update main header h1
+        mainTitleTextSpan.textContent = `📚 ${days}-Day Study Streak Challenge: Daily Report! 🚀`;
+
+        // Save to localStorage
+        localStorage.setItem('challengeDays', days);
+        
+        // Re-generate report to update the header text
+        if (participants.length > 0) {
+            generateReport();
+        }
+    }
+
+
+    function saveParticipants() {
+        localStorage.setItem('studyParticipants', JSON.stringify(participants));
+        localStorage.setItem('studyDay', dayInput.value);
+        localStorage.setItem('lastUpdated', new Date().toLocaleString());
+        updateSummaryStats();
+    }
+    
+    function updateSummaryStats() {
+        const grandTotalMinutes = participants.reduce((sum, p) => sum + p.totalStudyTimeMinutes, 0);
+        totalStudyHoursSpan.textContent = `Grand Total Study Time: ${formatTotalTime(grandTotalMinutes)}`;
+
+        const lastUpdated = localStorage.getItem('lastUpdated');
+        lastUpdatedSpan.textContent = `Last Updated: ${lastUpdated || 'N/A'}`;
+    }
+
+    function getDailyStudyTimeInMinutes(hrInput, minInput) {
+        const hours = evaluateExpression(hrInput.value);
+        const minutes = evaluateExpression(minInput.value);
+        
+        return (hours * 60) + minutes;
+    }
+
+
+    function sortParticipants() {
+        participants.sort((a, b) => {
+            if (a.isBanned) {
+                if (!b.isBanned) return 1;
+                return a.name.localeCompare(b.name);
+            } else if (b.isBanned) {
+                return -1;
+            }
+
+            // Non-banned sorting
+            if (b.currentStreak !== a.currentStreak) {
+                return b.currentStreak - a.currentStreak;
+            }
+            
+            // Secondary sort: Total study time (cumulative)
+            if (b.totalStudyTimeMinutes !== a.totalStudyTimeMinutes) {
+                 return b.totalStudyTimeMinutes - a.totalStudyTimeMinutes;
+            }
+
+            return a.name.localeCompare(b.name);
+        });
+    }
+
+    function createRow(participant) {
+        const row = document.createElement('tr');
+        row.className = 'data-entry-row';
+        row.setAttribute('data-name', participant.name);
+        
+        const initialHours = Math.floor(participant.studyTimeMinutes / 60);
+        const initialMinutes = participant.studyTimeMinutes % 60;
+        
+        const bannedChecked = participant.isBanned ? 'checked' : '';
+
+        row.innerHTML = `
+            <td data-label="Name"><input type="text" value="${participant.name}" class="name-input"></td>
+            <td data-label="Current Streak"><input type="number" value="${participant.currentStreak}" class="current-streak-input"></td>
+            <td data-label="Maximum Streak"><input type="number" value="${participant.maximumStreak}" class="max-streak-input"></td>
+            <td data-label="Study Time (hr)">
+                <div class="study-time-inputs">
+                    <input type="text" value="${initialHours}" class="study-hours-input study-input" min="0" max="23">
+                </div>
+            </td>
+            <td data-label="Study Time (min)">
+                <div class="study-time-inputs">
+                    <input type="text" value="${initialMinutes}" class="study-minutes-input study-input" min="0" max="59">
+                </div>
+            </td>
+            <td data-label="Total Study Time" class="total-study-time-display">${formatTotalTime(participant.totalStudyTimeMinutes)}</td>
+            <td data-label="Warnings" class="warnings-control">
+                <span class="warning-count">${participant.warnings}</span>
+                <button class="warn-minus-btn">-</button>
+                <button class="warn-plus-btn">+</button>
+            </td>
+            <td data-label="Banned?"><input type="checkbox" ${bannedChecked} class="banned-checkbox"></td>
+            <td data-label="Actions" class="actions">
+                <button class="btn done-btn">Done</button>
+                <button class="btn reset-btn">Reset</button>
+                <button class="btn delete-btn">Delete</button>
+            </td>
+        `;
+
+        const nameInput = row.querySelector('.name-input');
+        const currentStreakInput = row.querySelector('.current-streak-input');
+        const maxStreakInput = row.querySelector('.max-streak-input');
+        const studyHoursInput = row.querySelector('.study-hours-input');
+        const studyMinutesInput = row.querySelector('.study-minutes-input');
+        const totalStudyTimeDisplay = row.querySelector('.total-study-time-display');
+        const bannedCheckbox = row.querySelector('.banned-checkbox');
+        const doneBtn = row.querySelector('.done-btn');
+        const resetBtn = row.querySelector('.reset-btn');
+        const deleteBtn = row.querySelector('.delete-btn');
+        const warnPlusBtn = row.querySelector('.warn-plus-btn');
+        const warnMinusBtn = row.querySelector('.warn-minus-btn');
+        const warningCountSpan = row.querySelector('.warning-count');
+
+        function updateStudyTime(oldDailyMinutes) {
+            const newDailyMinutes = getDailyStudyTimeInMinutes(studyHoursInput, studyMinutesInput);
+            const deltaMinutes = newDailyMinutes - oldDailyMinutes;
+
+            participant.studyTimeMinutes = newDailyMinutes;
+            participant.totalStudyTimeMinutes += deltaMinutes;
+
+            const newHours = Math.floor(newDailyMinutes / 60);
+            const newMinutes = Math.round(newDailyMinutes % 60);
+            studyHoursInput.value = newHours;
+            studyMinutesInput.value = newMinutes;
+
+            totalStudyTimeDisplay.textContent = formatTotalTime(participant.totalStudyTimeMinutes);
+
+            saveParticipants();
+            generateReport();
+            
+            return newDailyMinutes;
+        }
+
+        let currentDailyMinutes = participant.studyTimeMinutes;
+
+        const studyTimeListener = (e) => {
+            currentDailyMinutes = updateStudyTime(currentDailyMinutes);
+        };
+
+        studyHoursInput.addEventListener('change', studyTimeListener);
+        studyMinutesInput.addEventListener('change', studyTimeListener);
+
+
+        // --- START: KEYDOWN FOR ENTER KEY NAVIGATION & CLEARING ---
+        currentStreakInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                studyHoursInput.value = ''; 
+                studyHoursInput.focus();
+            }
+        });
+
+        studyHoursInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                studyHoursInput.dispatchEvent(new Event('change'));
+                studyMinutesInput.value = ''; 
+                studyMinutesInput.focus();
+            }
+        });
+
+        studyMinutesInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                
+                studyMinutesInput.dispatchEvent(new Event('change'));
+                currentDailyMinutes = participant.studyTimeMinutes; 
+                
+                const currentStreak = parseInt(currentStreakInput.value) || 0;
+
+                if (currentStreak === 0) {
+                    warnPlusBtn.focus();
+                    
+                    const handleWarningKeydown = (keyEvent) => {
+                        if (keyEvent.key === 'ArrowUp' || keyEvent.key === 'ArrowDown') {
+                            keyEvent.preventDefault(); 
+                            if (keyEvent.key === 'ArrowUp') {
+                                warnPlusBtn.click(); 
+                            } else {
+                                warnMinusBtn.click(); 
+                            }
+                        } 
+                        else if (keyEvent.key === 'Enter') {
+                            keyEvent.preventDefault();
+                            
+                            doneBtn.click();
+                            
+                            document.activeElement.blur(); 
+                            
+                            warnPlusBtn.removeEventListener('keydown', handleWarningKeydown);
+                            warnMinusBtn.removeEventListener('keydown', handleWarningKeydown);
+                        }
+                    };
+
+                    warnPlusBtn.addEventListener('keydown', handleWarningKeydown);
+                    warnMinusBtn.addEventListener('keydown', handleWarningKeydown); 
+
+                } else {
+                    doneBtn.click();
+                    
+                    const nextRow = row.nextElementSibling;
+                    if (nextRow) {
+                        const nextStreakInput = nextRow.querySelector('.current-streak-input');
+                        nextStreakInput.focus();
+                    } 
+                }
+            }
+        });
+        // --- END: KEYDOWN FOR ENTER KEY NAVIGATION & CLEARING ---
+
+        // Other Event listeners (unchanged)
+        nameInput.addEventListener('input', (e) => {
+            participant.name = e.target.value;
+            row.setAttribute('data-name', participant.name);
+            saveParticipants();
+            generateReport();
+        });
+
+        currentStreakInput.addEventListener('input', (e) => {
+            let val = parseInt(e.target.value) || 0;
+            participant.currentStreak = val;
+            if (val > participant.maximumStreak) {
+                participant.maximumStreak = val;
+                row.querySelector('.max-streak-input').value = val;
+            }
+            saveParticipants();
+            generateReport();
+        });
+
+        maxStreakInput.addEventListener('input', (e) => {
+            participant.maximumStreak = parseInt(e.target.value) || 0;
+            saveParticipants();
+            generateReport();
+        });
+
+        bannedCheckbox.addEventListener('change', (e) => {
+            const oldIndex = participants.findIndex(p => p.name === participant.name);
+            participant.isBanned = e.target.checked;
+            
+            sortParticipants();
+            const newIndex = participants.findIndex(p => p.name === participant.name);
+            
+            saveParticipants();
+            renderTable(oldIndex, newIndex);
+            generateReport();
+        });
+
+        doneBtn.addEventListener('click', () => {
+            const oldIndex = participants.findIndex(p => p.name === participant.name);
+            sortParticipants();
+            const newIndex = participants.findIndex(p => p.name === participant.name);
+            
+            renderTable(oldIndex, newIndex);
+            saveParticipants();
+            generateReport();
+        });
+
+        resetBtn.addEventListener('click', () => {
+            if (confirm(`Are you sure you want to reset the streak for ${participant.name}? (Total study time will be saved)`)) {
+                const oldIndex = participants.findIndex(p => p.name === participant.name);
+                participant.currentStreak = 0;
+                row.querySelector('.current-streak-input').value = 0;
+                sortParticipants();
+                const newIndex = participants.findIndex(p => p.name === participant.name);
+
+                saveParticipants();
+                renderTable(oldIndex, newIndex);
+                generateReport();
+            }
+        });
+
+        deleteBtn.addEventListener('click', () => {
+            if (confirm(`Are you sure you want to delete ${participant.name}? This action cannot be undone.`)) {
+                participants = participants.filter(p => p.name !== participant.name);
+                row.remove();
+                saveParticipants();
+                generateReport();
+            }
+        });
+
+        warnPlusBtn.addEventListener('click', () => {
+            participant.warnings++;
+            warningCountSpan.textContent = participant.warnings;
+            saveParticipants();
+            generateReport();
+        });
+
+        warnMinusBtn.addEventListener('click', () => {
+            if (participant.warnings > 0) {
+                participant.warnings--;
+                warningCountSpan.textContent = participant.warnings;
+                saveParticipants();
+                generateReport();
+            }
+        });
+        
+        return row;
+    }
+
+    function renderTable(oldIndex = -1, newIndex = -1) {
+        dataTableBody.innerHTML = '';
+        participants.forEach((p, index) => {
+            const row = createRow(p);
+            dataTableBody.appendChild(row);
+            
+            if (index === newIndex && oldIndex !== -1 && newIndex !== -1) {
+                if (newIndex < oldIndex) {
+                    row.classList.add('highlight-up');
+                } else if (newIndex > oldIndex) {
+                    row.classList.add('highlight-down');
+                }
+                
+                setTimeout(() => {
+                    row.classList.remove('highlight-up');
+                    row.classList.remove('highlight-down');
+                }, 1500);
+            }
+        });
+        updateSummaryStats();
+    }
+
+    function generateReport() {
+        const day = dayInput.value;
+        const days = challengeDaysInput.value;
+        const leaderboardCandidates = []; 
+        const wipeoutZone = [];
+        const bannedZone = [];
+
+        const sortedParticipants = [...participants].sort((a, b) => {
+            if (a.isBanned) {
+                if (!b.isBanned) return 1;
+                return a.name.localeCompare(b.name);
+            } else if (b.isBanned) {
+                return -1;
+            }
+            
+            if (b.currentStreak !== a.currentStreak) {
+                return b.currentStreak - a.currentStreak;
+            }
+            
+            if (b.totalStudyTimeMinutes !== a.totalStudyTimeMinutes) {
+                 return b.totalStudyTimeMinutes - a.totalStudyTimeMinutes;
+            }
+            return a.name.localeCompare(b.name);
+        });
+
+        sortedParticipants.forEach(p => {
+            if (p.isBanned) {
+                bannedZone.push(p);
+            } else if (p.currentStreak === 0) {
+                wipeoutZone.push(p);
+            } else {
+                leaderboardCandidates.push(p); 
+            }
+        });
+
+        // Split leaderboard candidates into Top 5 and Others
+        const top5 = leaderboardCandidates.slice(0, 5);
+        const otherParticipants = leaderboardCandidates.slice(5);
+
+        const formatTotalTimeForReport = (p) => `| Total study hr: ${formatTotalTime(p.totalStudyTimeMinutes)}`;
+
+        // Report Generation
+        let reportText = `### **📚 ${days}-Day Study Streak Challenge: Daily Report! 🚀**\n\n`;
+        reportText += `**🔥 Day [${day}] Leaderboard! 🔥**\n\n`;
+
+        // Top 5 Section
+        reportText += `**🏆 Today's Top 5!**\n\n`;
+        if (top5.length > 0) {
+            top5.forEach((p, index) => {
+                const warningsText = p.warnings > 0 ? ` ⚠️-${p.warnings}` : '';
+                reportText += `${index + 1}. [${p.name.trim()}${warningsText}] - Current Streak: [${p.currentStreak}] Days | Max Streak: [${p.maximumStreak}] Days ${formatTotalTimeForReport(p)}\n`;
+            });
+        } else {
+            reportText += `No one in the Top 5 today.\n`;
+        }
+        reportText += `\n`;
+
+        // Other Participants (starts at 6)
+        reportText += `**🥇 Other Participants (excluding Top 5 and Wipeout Zone)**\n\n`;
+        if (otherParticipants.length > 0) {
+            otherParticipants.forEach((p, index) => {
+                // Index + 6 for sequential numbering starting from 6
+                const warningsText = p.warnings > 0 ? ` ⚠️-${p.warnings}` : '';
+                reportText += `${index + 6}. [${p.name.trim()}${warningsText}] - Current Streak: [${p.currentStreak}] Days | Max Streak: [${p.maximumStreak}] Days ${formatTotalTimeForReport(p)}\n`;
+            });
+        } else {
+            reportText += `No other participants today.\n`;
+        }
+        reportText += `\n`;
+
+        // Wipeout Zone
+        reportText += `### **❌ The Wipeout Zone**\n\n`;
+        reportText += `**(Total: ${wipeoutZone.length})**\n\n`;
+        if (wipeoutZone.length > 0) {
+            wipeoutZone.forEach(p => {
+                const nameInReport = p.name.trim().replace(/'/g, '\\\'');
+                const warningsText = p.warnings > 0 ? ` ⚠️-${p.warnings}` : '';
+                reportText += `- [${nameInReport}${warningsText}] - (Current Streak reset) ${formatTotalTimeForReport(p)}\n`;
+            });
+        } else {
+            reportText += `No one in the Wipeout Zone today.\n`;
+        }
+        reportText += `\n`;
+
+        // Banned Zone
+        reportText += `### 🚫 **Banned Zone**\n\n`;
+        if (bannedZone.length > 0) {
+            bannedZone.forEach(p => {
+                reportText += `- [${p.name.trim()}] - (Banned from challenge)\n`;
+            });
+        } else {
+            reportText += `No one in the Banned Zone today.\n`;
+        }
+        reportText += `\n`;
+        
+        reportPreview.textContent = reportText.trim();
+        renderPreviewBoxes(top5, wipeoutZone, bannedZone); 
+    }
+    
+    function renderPreviewBoxes(top5, wipeout, banned) {
+        function createPreviewList(container, data, formatter) {
+            container.innerHTML = '';
+            data.forEach(p => {
+                const li = document.createElement('li');
+                li.innerHTML = `<span>${p.name.trim() || 'No Name'}${p.warnings > 0 ? ` ⚠️-${p.warnings}` : ''}</span> <span>${formatter(p)}</span>`;
+                container.appendChild(li);
+            });
+        }
+
+        // Top 5 Preview
+        createPreviewList(top5Preview, top5, p => `Streak: ${p.currentStreak} | Total: ${formatTotalTime(p.totalStudyTimeMinutes)}`);
+        
+        createPreviewList(wipeoutPreview, wipeout, p => `Streak reset | Total: ${formatTotalTime(p.totalStudyTimeMinutes)}`);
+        createPreviewList(bannedPreview, banned, p => `Banned from challenge`);
+    }
+
+    let currentFocus;
+    modalSearchBox.addEventListener("input", function(e) {
+        let val = this.value;
+        closeAllLists(null, true);
+        if (!val) { return false;}
+        currentFocus = -1;
+        
+        const matchingNames = participants
+            .map(p => p.name)
+            .filter(name => name.toLowerCase().includes(val.toLowerCase()))
+            .slice(0, 5);
+
+        if (matchingNames.length > 0) {
+            const listDiv = document.createElement("DIV");
+            listDiv.setAttribute("id", this.id + "autocomplete-list");
+            listDiv.setAttribute("class", "modal-autocomplete-items");
+            this.parentNode.appendChild(listDiv);
+
+            matchingNames.forEach(name => {
+                const div = document.createElement("DIV");
+                div.innerHTML = `<strong>${name.substr(0, val.length)}</strong>${name.substr(val.length)}`;
+                div.innerHTML += `<input type='hidden' value='${name}'>`;
+                div.addEventListener("click", function(e) {
+                    const selectedName = this.getElementsByTagName("input")[0].value;
+                    modalSearchBox.value = selectedName;
+                    closeAllLists(null, true);
+                    
+                    searchAndHighlight(selectedName); 
+                    
+                    searchModal.style.display = 'none'; 
+                });
+                listDiv.appendChild(div);
+            });
+        }
+    });
+
+    modalSearchBox.addEventListener("keydown", function(e) {
+        let x = document.getElementById(this.id + "autocomplete-list");
+        if (x) x = x.getElementsByTagName("div");
+        if (e.keyCode == 40) { 
+            currentFocus++;
+            addActive(x);
+        } else if (e.keyCode == 38) { 
+            currentFocus--;
+            addActive(x);
+        } else if (e.keyCode == 13) { 
+            e.preventDefault();
+            
+            let clicked = false;
+            if (currentFocus > -1) {
+                if (x) { 
+                    x[currentFocus].click(); 
+                    clicked = true;
+                }
+            } else if (x && x.length > 0) {
+                x[0].click();
+                clicked = true;
+            }
+            
+            if (!clicked && this.value) { 
+                const searchTerm = this.value;
+                if (searchAndHighlight(searchTerm)) {
+                    searchModal.style.display = 'none';
+                    closeAllLists(null, true); 
+                }
+            }
+        }
+    });
+
+    function addActive(x) {
+        if (!x) return false;
+        removeActive(x);
+        if (currentFocus >= x.length) currentFocus = 0;
+        if (currentFocus < 0) currentFocus = (x.length - 1);
+        x[currentFocus].classList.add("autocomplete-active");
+    }
+
+    function removeActive(x) {
+        for (let i = 0; i < x.length; i++) {
+            x[i].classList.remove("autocomplete-active");
+        }
+    }
+
+    function closeAllLists(elmnt, isModal) {
+        const x = document.getElementsByClassName(isModal ? "modal-autocomplete-items" : "autocomplete-items");
+        for (let i = 0; i < x.length; i++) {
+            if (elmnt != x[i]) {
+                if(x[i] && x[i].parentNode) {
+                    x[i].parentNode.removeChild(x[i]);
+                }
+            }
+        }
+    }
+    
+    document.addEventListener("click", function (e) {
+        if (e.target.closest('.modal-content')) {
+            return;
+        }
+        closeAllLists(e.target, true);
+    });
+    
+    function searchAndHighlight(searchTerm) {
+        const searchTermLower = searchTerm.toLowerCase();
+        const rows = dataTableBody.querySelectorAll('.data-entry-row');
+        
+        rows.forEach(row => row.classList.remove('highlighted-row'));
+
+        let foundRow = null;
+        
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            const name = row.getAttribute('data-name').toLowerCase();
+            if (name.includes(searchTermLower)) {
+                foundRow = row;
+                break; 
+            }
+        }
+        
+        if (foundRow) {
+            foundRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            foundRow.classList.add('highlighted-row');
+            setTimeout(() => {
+                foundRow.classList.remove('highlighted-row');
+            }, 1500);
+            
+            const currentStreakInput = foundRow.querySelector('.current-streak-input');
+            if (currentStreakInput) {
+                currentStreakInput.focus();
+            }
+            
+            return true; 
+        }
+        return false; 
+    }
+    
+    // --- START: DATA IMPORT/EXPORT ---
+    function exportData() {
+        const dataToExport = JSON.stringify(participants, null, 4);
+        const filename = `study_participants_Day_${dayInput.value}.json`;
+        const blob = new Blob([dataToExport], { type: 'application/json;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        alert('Participant data exported successfully!');
+    }
+
+    function importData(file) {
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const importedData = JSON.parse(e.target.result);
+                if (!Array.isArray(importedData) || importedData.length === 0 || !importedData[0].hasOwnProperty('name')) {
+                    alert('Import failed: Invalid JSON format or missing required fields.');
+                    return;
+                }
+
+                const sanitizedData = importedData.map(p => ({
+                    name: String(p.name || 'New Participant'),
+                    currentStreak: parseInt(p.currentStreak) || 0,
+                    maximumStreak: parseInt(p.maximumStreak) || 0,
+                    studyTimeMinutes: parseFloat(p.studyTimeMinutes) || 0,
+                    totalStudyTimeMinutes: parseFloat(p.totalStudyTimeMinutes) || 0,
+                    warnings: parseInt(p.warnings) || 0,
+                    isBanned: !!p.isBanned,
+                }));
+
+                const importedDay = importedData.dayNumber !== undefined ? importedData.dayNumber : dayInput.value;
+                dayInput.value = importedDay;
+                dayNumber = importedDay;
+
+                participants = sanitizedData;
+                sortParticipants();
+                saveParticipants();
+                renderTable();
+                
+                // Update challenge days if available in imported data
+                if (importedData.challengeDays !== undefined) {
+                    challengeDaysInput.value = importedData.challengeDays;
+                    updateChallengeDayDisplays();
+                } else {
+                    generateReport(); 
+                }
+
+
+                alert('Participant data imported successfully! Table has been updated.');
+
+            } catch (error) {
+                console.error('Import error:', error);
+                alert('Import failed: Could not parse JSON file.');
+            }
+        };
+        reader.onerror = function() {
+            alert('Error reading file.');
+        };
+        reader.readAsText(file);
+    }
+    
+    exportDataBtn.addEventListener('click', exportData);
+
+    importDataBtn.addEventListener('click', () => {
+        importDataInput.click();
+    });
+
+    importDataInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            importData(file);
+        }
+        e.target.value = null; 
+    });
+    // --- END: DATA IMPORT/EXPORT ---
+
+    // --- START: GLOBAL RESET ---
+    globalResetBtn.addEventListener('click', () => {
+        const modalMessage = "Are you sure you want to perform a **Global Reset**? This will reset the Current Streak, Max Streak, Daily Study Time, Total Study Time, and Warnings for **ALL** participants. Participants will *not* be deleted.";
+        
+        const confirmDialog = document.createElement('div');
+        confirmDialog.classList.add('modal');
+        confirmDialog.style.display = 'flex';
+        confirmDialog.innerHTML = `
+            <div class="modal-content">
+                <p>${modalMessage}</p>
+                <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+                    <button id="confirm-yes-global" class="btn btn-red">Yes, Global Reset</button>
+                    <button id="confirm-no-global" class="btn">No, Cancel</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(confirmDialog);
+
+        document.getElementById('confirm-yes-global').onclick = () => {
+            participants.forEach(p => {
+                p.currentStreak = 0;
+                p.maximumStreak = 0;
+                p.studyTimeMinutes = 0;
+                p.totalStudyTimeMinutes = 0;
+                p.warnings = 0;
+            }); 
+            
+            sortParticipants(); 
+            saveParticipants();
+            renderTable(); 
+            generateReport();
+            document.body.removeChild(confirmDialog);
+            alert('Global Reset Complete. All streaks, study times, and warnings have been reset.');
+        };
+        document.getElementById('confirm-no-global').onclick = () => {
+            document.body.removeChild(confirmDialog);
+        };
+    });
+    // --- END: GLOBAL RESET ---
+
+
+    addNewRowBtn.addEventListener('click', () => {
+        const newParticipant = {
+            name: '',
+            currentStreak: 0,
+            maximumStreak: 0,
+            studyTimeMinutes: 0,
+            totalStudyTimeMinutes: 0,
+            warnings: 0,
+            isBanned: false,
+        };
+        participants.push(newParticipant);
+        saveParticipants();
+        renderTable();
+        generateReport();
+    });
+
+    resetStudyTimeBtn.addEventListener('click', () => {
+        const modalMessage = "Are you sure you want to reset **daily** study time for all participants? (Total cumulative time will be saved)";
+        const confirmDialog = document.createElement('div');
+        confirmDialog.classList.add('modal');
+        confirmDialog.style.display = 'flex';
+        confirmDialog.innerHTML = `
+            <div class="modal-content">
+                <p>${modalMessage}</p>
+                <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+                    <button id="confirm-yes" class="btn btn-red">Yes</button>
+                    <button id="confirm-no" class="btn">No</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(confirmDialog);
+
+        document.getElementById('confirm-yes').onclick = () => {
+            participants.forEach(p => p.studyTimeMinutes = 0); 
+            saveParticipants();
+            renderTable(); 
+            generateReport();
+            document.body.removeChild(confirmDialog);
+        };
+        document.getElementById('confirm-no').onclick = () => {
+            document.body.removeChild(confirmDialog);
+        };
+    });
+    
+    copyReportBtn.addEventListener('click', () => {
+        const reportContent = reportPreview.textContent;
+        navigator.clipboard.writeText(reportContent).then(() => {
+            const messageBox = document.createElement('div');
+            messageBox.classList.add('modal');
+            messageBox.style.display = 'flex';
+            messageBox.innerHTML = `
+                <div class="modal-content" style="text-align: center;">
+                    <p>Report copied to clipboard!</p>
+                    <button id="ok-btn" class="btn btn-green">OK</button>
+                </div>
+            `;
+            document.body.appendChild(messageBox);
+
+            document.getElementById('ok-btn').onclick = () => {
+                document.body.removeChild(messageBox);
+            };
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+        });
+    });
+    
+    downloadReportBtn.addEventListener('click', () => {
+        const reportContent = reportPreview.textContent;
+        const filename = `study_report_Day_${dayInput.value}.txt`;
+        const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
+    dayInput.addEventListener('input', () => {
+        saveParticipants();
+        generateReport();
+    });
+
+    // NEW: Event listener for challenge days input
+    challengeDaysInput.addEventListener('input', updateChallengeDayDisplays);
+
+    darkModeToggle.addEventListener('change', () => {
+        body.classList.toggle('light-mode', !darkModeToggle.checked);
+        localStorage.setItem('darkMode', !darkModeToggle.checked);
+    });
+
+    openSearchBtn.addEventListener('click', () => {
+        searchModal.style.display = 'flex';
+        modalSearchBox.value = ''; 
+        closeAllLists(null, true); 
+        modalSearchBox.focus();
+    });
+
+    closeBtn.addEventListener('click', () => {
+        searchModal.style.display = 'none';
+        modalSearchBox.value = '';
+        closeAllLists(null, true);
+    });
+    
+    window.addEventListener('click', (event) => {
+        if (event.target == searchModal) {
+            searchModal.style.display = 'none';
+            modalSearchBox.value = '';
+            closeAllLists(null, true);
+        }
+    });
+    
+    // --- START: GLOBAL KEYBOARD SHORTCUT ---
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 's' && !e.altKey && !e.ctrlKey && !e.metaKey && !['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) {
+            e.preventDefault(); 
+            openSearchBtn.click(); 
+        }
+    });
+    // --- END: GLOBAL KEYBOARD SHORTCUT ---
+
+    window.onload = () => {
+        const isLightMode = localStorage.getItem('darkMode') === 'true';
+        if (isLightMode) {
+            body.classList.add('light-mode');
+            darkModeToggle.checked = false;
+        } else {
+             darkModeToggle.checked = true;
+        }
+        
+        // Load and update challenge days first
+        const storedChallengeDays = localStorage.getItem('challengeDays') || 10;
+        challengeDaysInput.value = storedChallengeDays;
+        updateChallengeDayDisplays(); 
+        
+        sortParticipants(); 
+        renderTable();
+
+        if (!localStorage.getItem('studyParticipants')) {
+            // Update the default report content with the correct number of days
+            const days = challengeDaysInput.value;
+            const updatedDefaultReport = DEFAULT_REPORT_CONTENT.replace('10-Day', `${days}-Day`);
+            reportPreview.textContent = updatedDefaultReport.trim();
+        } else {
+            generateReport();
+        }
+    };
+</script>
+
+</body>
+</html>
